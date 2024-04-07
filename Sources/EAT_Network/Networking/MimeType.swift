@@ -1,0 +1,105 @@
+import Foundation
+
+public enum MimeType: Equatable {
+    case pdf
+    case png
+    case jpeg
+    case gif
+    case bmp
+    case svg
+    case mp4
+    case mov
+    case avi
+    case mkv
+    case webm
+    case wav
+    case mp3
+    case ogg
+    case flac
+    case txt
+    case html
+    case css
+    case js
+    case json
+    case xml
+    case csv
+    case doc
+    case docx
+    case ppt
+    case pptx
+    case xls
+    case xlsx
+    case zip
+    case rar
+    case tar
+    case custom(String)
+
+    var rawValue: String {
+        switch self {
+        case .pdf:
+            return "application/pdf"
+        case .png:
+            return "image/png"
+        case .jpeg:
+            return "image/jpeg"
+        case .gif:
+            return "image/gif"
+        case .bmp:
+            return "image/bmp"
+        case .svg:
+            return "image/svg+xml"
+        case .mp4:
+            return "video/mp4"
+        case .mov:
+            return "video/quicktime"
+        case .avi:
+            return "video/x-msvideo"
+        case .mkv:
+            return "video/x-matroska"
+        case .webm:
+            return "video/webm"
+        case .wav:
+            return "audio/wav"
+        case .mp3:
+            return "audio/mpeg"
+        case .ogg:
+            return "audio/ogg"
+        case .flac:
+            return "audio/flac"
+        case .txt:
+            return "text/plain"
+        case .html:
+            return "text/html"
+        case .css:
+            return "text/css"
+        case .js:
+            return "application/javascript"
+        case .json:
+            return "application/json"
+        case .xml:
+            return "application/xml"
+        case .csv:
+            return "text/csv"
+        case .doc:
+            return "application/msword"
+        case .docx:
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        case .ppt:
+            return "application/vnd.ms-powerpoint"
+        case .pptx:
+            return "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        case .xls:
+            return "application/vnd.ms-excel"
+        case .xlsx:
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        case .zip:
+            return "application/zip"
+        case .rar:
+            return "application/vnd.rar"
+        case .tar:
+            return "application/x-tar"
+        case .custom(let type):
+            return type
+        }
+    }
+}
