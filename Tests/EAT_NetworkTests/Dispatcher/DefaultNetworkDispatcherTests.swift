@@ -10,9 +10,26 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
     private struct MockRequest: RequestType {
         let baseUrl: URL = URL(string: "https://example.com")!
         let path: String = "/api/endpoint"
-        let method: String = "GET"
+        let method: HTTPMethod = .get
         let parameters: [String: String] = [:]
 
+        let responseDecoder: (Data) throws -> Int = { data in
+            guard let responseString = String(data: data, encoding: .utf8),
+                  let responseInt = Int(responseString) else {
+                throw NetworkError.invalidResponse
+            }
+            return responseInt
+        }
+    }
+    
+    private struct MockFileRequest: FileRequestType {
+        var fileName: String = "FileName"
+        var mimeType: EAT_Network.MimeType = .png
+        var data: Data = Data()
+        let baseUrl: URL = URL(string: "https://example.com")!
+        let path: String = "/api/endpoint"
+        let method: HTTPMethod = .post
+        
         let responseDecoder: (Data) throws -> Int = { data in
             guard let responseString = String(data: data, encoding: .utf8),
                   let responseInt = Int(responseString) else {
@@ -85,6 +102,54 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
 
         // Then
         XCTAssertEqual(thrownError as? NSError, mockError)
+    }
+    
+    func testUploadWithValidRequest() async {
+        // Given
+        let request = MockFileRequest()
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        let result = try? await networkDispatcher.upload(request)
+
+        // Then
+        XCTAssertEqual(result, 42)
+    }
+    
+    func testCreateBodyForFileRequest() {
+        // Given
+        let request = MockFileRequest()
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        let uuid = UUID().uuidString
+        let boundary = "Boundary-\(uuid)"
+        let body = networkDispatcher.createBody(
+            boundary: boundary,
+            data: request.data,
+            mimeType: request.mimeType.rawValue,
+            filename: request.fileName
+        )
+
+        // Then
+        let bodyString = String(data: body, encoding: .utf8)!
+        XCTAssertTrue(bodyString.contains("Boundary-\(uuid)"))
+        XCTAssertTrue(bodyString.contains("Content-Disposition: form-data; name=\"file\"; filename=\"\(request.fileName)\""))
+        XCTAssertTrue(bodyString.contains("Content-Type: \(request.mimeType.rawValue)"))
     }
 
     // MARK: - Mock URLSession

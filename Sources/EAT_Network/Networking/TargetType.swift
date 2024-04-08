@@ -9,7 +9,7 @@ public protocol TargetType: URLRequestConvertible {
     var path: String { get }
 
     /// The HTTP method of the request.
-    var method: String { get }
+    var method: HTTPMethod { get }
 
     /// The query parameters of the request.
     var queryParameters: [String: String] { get }

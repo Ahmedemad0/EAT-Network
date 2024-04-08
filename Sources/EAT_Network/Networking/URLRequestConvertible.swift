@@ -27,7 +27,7 @@ extension URLRequestConvertible where Self: TargetType {
         }
 
         var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = method
+        urlRequest.httpMethod = method.rawValue
         urlRequest.allHTTPHeaderFields = headers
         urlRequest.httpBody = httpBody
 
