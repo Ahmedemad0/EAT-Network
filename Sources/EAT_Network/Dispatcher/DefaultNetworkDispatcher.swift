@@ -30,7 +30,7 @@ public final class DefaultNetworkDispatcher: NetworkDispatcher {
         urlRequest.httpBody = createBody(
             boundary: boundary,
             data: requestData,
-            mimeType: "audio/wav",
+            mimeType: request.mimeType.rawValue,
             filename: filename
         )
 
