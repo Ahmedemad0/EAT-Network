@@ -9,7 +9,7 @@ final class URLRequestConvertibleTests: XCTestCase {
     private struct MockTargetType: TargetType {
         var baseUrl: URL = URL(string: "https://example.com")!
         var path: String = "api/endpoint"
-        var method: String = "GET"
+        var method: HTTPMethod = .get
         var queryParameters: [String: String] = [:]
         var headers: [String: String] = [:]
         var bodyParameters: [String: Any] = [:]
@@ -55,7 +55,7 @@ final class URLRequestConvertibleTests: XCTestCase {
     func testAsURLRequestWithBodyParameters() {
         // Given
         var targetType = MockTargetType()
-        targetType.method = "POST"
+        targetType.method = .post
         targetType.headers["Content-Type"] = "application/x-www-form-urlencoded"
         targetType.queryParameters = ["param2": "value2"]
         targetType.bodyParameters = ["key2": "value2"]

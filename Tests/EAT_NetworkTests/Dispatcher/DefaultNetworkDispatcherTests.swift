@@ -10,7 +10,7 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
     private struct MockRequest: RequestType {
         let baseUrl: URL = URL(string: "https://example.com")!
         let path: String = "/api/endpoint"
-        let method: String = "GET"
+        let method: HTTPMethod = .get
         let parameters: [String: String] = [:]
 
         let responseDecoder: (Data) throws -> Int = { data in
@@ -28,7 +28,7 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
         var data: Data = Data()
         let baseUrl: URL = URL(string: "https://example.com")!
         let path: String = "/api/endpoint"
-        let method: String = "POST"
+        let method: HTTPMethod = .post
         
         let responseDecoder: (Data) throws -> Int = { data in
             guard let responseString = String(data: data, encoding: .utf8),
