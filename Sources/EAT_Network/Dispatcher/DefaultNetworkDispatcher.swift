@@ -29,6 +29,7 @@ public final class DefaultNetworkDispatcher: NetworkDispatcher {
         urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         urlRequest.httpBody = createBody(
             boundary: boundary,
+            key: request.key,
             data: requestData,
             mimeType: request.mimeType.rawValue,
             filename: filename

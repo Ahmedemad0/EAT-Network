@@ -23,6 +23,7 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
     }
     
     private struct MockFileRequest: FileRequestType {
+        var key: String = "MockKey"
         var fileName: String = "FileName"
         var mimeType: EAT_Network.MimeType = .png
         var data: Data = Data()
@@ -140,6 +141,7 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
         let boundary = "Boundary-\(uuid)"
         let body = networkDispatcher.createBody(
             boundary: boundary,
+            key: request.key,
             data: request.data,
             mimeType: request.mimeType.rawValue,
             filename: request.fileName
@@ -148,7 +150,7 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
         // Then
         let bodyString = String(data: body, encoding: .utf8)!
         XCTAssertTrue(bodyString.contains("Boundary-\(uuid)"))
-        XCTAssertTrue(bodyString.contains("Content-Disposition: form-data; name=\"file\"; filename=\"\(request.fileName)\""))
+        XCTAssertTrue(bodyString.contains("Content-Disposition: form-data; name=\"\(request.key)\"; filename=\"\(request.fileName)\""))
         XCTAssertTrue(bodyString.contains("Content-Type: \(request.mimeType.rawValue)"))
     }
 

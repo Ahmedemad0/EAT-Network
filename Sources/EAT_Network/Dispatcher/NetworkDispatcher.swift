@@ -36,12 +36,18 @@ extension NetworkDispatcher {
      
      - Returns: The request body as `Data`.
      */
-    func createBody(boundary: String, data: Data, mimeType: String, filename: String) -> Data {
+    func createBody(
+        boundary: String,
+        key: String,
+        data: Data,
+        mimeType: String,
+        filename: String
+    ) -> Data {
         let body = NSMutableData()
         let boundaryPrefix = "--\(boundary)\r\n"
 
         body.append(boundaryPrefix)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
+        body.append("Content-Disposition: form-data; name=\"\(key)\"; filename=\"\(filename)\"\r\n")
         body.append("Content-Type: \(mimeType)\r\n\r\n")
         body.append(data)
         body.append("\r\n")

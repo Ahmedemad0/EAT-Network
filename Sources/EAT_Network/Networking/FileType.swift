@@ -2,6 +2,13 @@ import Foundation
 
 /// A protocol representing a file type.
 public protocol FileType {
+    /**
+     Represents a file type with a key.
+     
+     - Returns: The key associated with the file type.
+     */
+    var key: String { get }
+
     /// The name of the file.
     var fileName: String { get }
     
