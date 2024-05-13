@@ -102,4 +102,73 @@ public enum MimeType: Equatable {
             return type
         }
     }
+
+    var fileExtension: String {
+        switch self {
+        case .pdf:
+            return "pdf"
+        case .png:
+            return "png"
+        case .jpeg:
+            return "jpeg"
+        case .gif:
+            return "gif"
+        case .bmp:
+            return "bmp"
+        case .svg:
+            return "svg"
+        case .mp4:
+            return "mp4"
+        case .mov:
+            return "mov"
+        case .avi:
+            return "avi"
+        case .mkv:
+            return "mkv"
+        case .webm:
+            return "webm"
+        case .wav:
+            return "wav"
+        case .mp3:
+            return "mp3"
+        case .ogg:
+            return "ogg"
+        case .flac:
+            return "flac"
+        case .txt:
+            return "txt"
+        case .html:
+            return "html"
+        case .css:
+            return "css"
+        case .js:
+            return "js"
+        case .json:
+            return "json"
+        case .xml:
+            return "xml"
+        case .csv:
+            return "csv"
+        case .doc:
+            return "doc"
+        case .docx:
+            return "docx"
+        case .ppt:
+            return "ppt"
+        case .pptx:
+            return "pptx"
+        case .xls:
+            return "xls"
+        case .xlsx:
+            return "xlsx"
+        case .zip:
+            return "zip"
+        case .rar:
+            return "rar"
+        case .tar:
+            return "tar"
+        case .custom(let type):
+            return type
+        }
+    }
 }
