@@ -77,7 +77,6 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
         let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
         let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
 
-        // When/Then
         // When
         var thrownError: Error?
         do {
@@ -190,6 +189,132 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
         XCTAssertTrue(bodyString.contains("Content-Type: \(request.files[0].mimeType.rawValue)"))
         XCTAssertTrue(bodyString.contains("Content-Disposition: form-data; name=\"\(request.files[1].key)\"; filename=\"\(request.files[1].fileName)\""))
         XCTAssertTrue(bodyString.contains("Content-Type: \(request.files[1].mimeType.rawValue)"))
+    }
+    
+    func testHandlingResponseWithStatusCode200() async {
+        // Given
+        let request = MockRequest()
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        do {
+            let result = try await networkDispatcher.dispatch(request)
+        } catch {
+            // Then
+            XCTFail("Shouldn't throw an error")
+        }
+    }
+    
+    func testHandlingResponseWithStatusCode400() async {
+        // Given
+        let request = MockRequest()
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 400,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        do {
+            let result = try await networkDispatcher.dispatch(request)
+        } catch {
+            // Then
+            XCTAssertEqual(error as! NetworkError, NetworkError.badRequest)
+        }
+    }
+    
+    func testHandlingResponseWithStatusCode401() async {
+        // Given
+        let request = MockRequest()
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 401,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        do {
+            let result = try await networkDispatcher.dispatch(request)
+        } catch {
+            // Then
+            XCTAssertEqual(error as! NetworkError, NetworkError.unauthorized)
+        }
+    }
+    
+    func testHandlingResponseWithStatusCode403() async {
+        // Given
+        let request = MockRequest()
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 403,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        do {
+            let result = try await networkDispatcher.dispatch(request)
+        } catch {
+            // Then
+            XCTAssertEqual(error as! NetworkError, NetworkError.forbidden)
+        }
+    }
+    
+    func testHandlingResponseWithStatusCode404() async {
+        // Given
+        let request = MockRequest()
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 404,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        do {
+            let result = try await networkDispatcher.dispatch(request)
+        } catch {
+            // Then
+            XCTAssertEqual(error as! NetworkError, NetworkError.notFound)
+        }
+    }
+    
+    func testHandlingResponseWithStatusCode500() async {
+        // Given
+        let request = MockRequest()
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 500,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        do {
+            let result = try await networkDispatcher.dispatch(request)
+        } catch {
+            // Then
+            XCTAssertEqual(error as! NetworkError, NetworkError.server("Server Error - 500 Something went wrong on the server's side."))
+        }
     }
     
     // MARK: - Mock URLSession
