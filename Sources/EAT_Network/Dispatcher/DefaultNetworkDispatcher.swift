@@ -13,7 +13,8 @@ public final class DefaultNetworkDispatcher: NetworkDispatcher {
 
     public func dispatch<Request: RequestType>(_ request: Request) async throws -> Request.ResponseType {
         let urlRequest = try request.asURLRequest()
-        let (data, _) = try await session.data(for: urlRequest)
+        let (data, response) = try await session.data(for: urlRequest)
+        try handleResponse(response)
         return try request.responseDecoder(data)
     }
     
@@ -43,7 +44,31 @@ public final class DefaultNetworkDispatcher: NetworkDispatcher {
             files: files
         )
 
-        let (data, _) = try await session.data(for: urlRequest)
+        let (data, response) = try await session.data(for: urlRequest)
+        try handleResponse(response)
         return try request.responseDecoder(data)
+    }
+    
+    private func handleResponse(_ response: URLResponse?) throws {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+
+        switch httpResponse.statusCode {
+        case 200...299:
+           break
+        case 400:
+            throw NetworkError.badRequest
+        case 401:
+            throw NetworkError.unauthorized
+        case 403:
+            throw NetworkError.forbidden
+        case 404:
+            throw NetworkError.notFound
+        case 500...599:
+            throw NetworkError.server("Server Error - \(httpResponse.statusCode) Something went wrong on the server's side.")
+        default:
+            throw NetworkError.custom("Received HTTP \(httpResponse.statusCode), which was not handled explicitly.")
+        }
     }
 }
