@@ -22,10 +22,15 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
         }
     }
     
-    private struct MockFileRequest: FileRequestType {
-        var fileName: String = "FileName"
-        var mimeType: EAT_Network.MimeType = .png
-        var data: Data = Data()
+    private struct MockFileRequest: FilesRequestType {
+        var files: [FileType] = [
+            DefaultFile(
+                key: "MockKey",
+                fileName: "FileName",
+                mimeType: .png,
+                data: Data()
+            )
+        ]
         let baseUrl: URL = URL(string: "https://example.com")!
         let path: String = "/api/endpoint"
         let method: HTTPMethod = .post
@@ -123,7 +128,7 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
         XCTAssertEqual(result, 42)
     }
     
-    func testCreateBodyForFileRequest() {
+    func testCreateBodyForOneFileRequest() {
         // Given
         let request = MockFileRequest()
         let mockData = "42".data(using: .utf8)!
@@ -140,18 +145,53 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
         let boundary = "Boundary-\(uuid)"
         let body = networkDispatcher.createBody(
             boundary: boundary,
-            data: request.data,
-            mimeType: request.mimeType.rawValue,
-            filename: request.fileName
+            files: request.files
         )
 
         // Then
         let bodyString = String(data: body, encoding: .utf8)!
         XCTAssertTrue(bodyString.contains("Boundary-\(uuid)"))
-        XCTAssertTrue(bodyString.contains("Content-Disposition: form-data; name=\"file\"; filename=\"\(request.fileName)\""))
-        XCTAssertTrue(bodyString.contains("Content-Type: \(request.mimeType.rawValue)"))
+        XCTAssertTrue(bodyString.contains("Content-Disposition: form-data; name=\"\(request.files[0].key)\"; filename=\"\(request.files[0].fileName)\""))
+        XCTAssertTrue(bodyString.contains("Content-Type: \(request.files[0].mimeType.rawValue)"))
     }
 
+    func testUploadingMultipleFilesRequest() {
+        // Given
+        var request = MockFileRequest()
+        request.files.append(
+            DefaultFile(
+                key: "MockKey2",
+                fileName: "FileName2",
+                mimeType: .jpeg,
+                data: Data()
+            )
+        )
+        let mockData = "42".data(using: .utf8)!
+        let mockURLResponse = HTTPURLResponse(
+            url: request.baseUrl,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil)!
+        let mockSession = URLSessionMock(result: .success((mockData, mockURLResponse)))
+        let networkDispatcher = DefaultNetworkDispatcher(session: mockSession)
+
+        // When
+        let uuid = UUID().uuidString
+        let boundary = "Boundary-\(uuid)"
+        let body = networkDispatcher.createBody(
+            boundary: boundary,
+            files: request.files
+        )
+
+        // Then
+        let bodyString = String(data: body, encoding: .utf8)!
+        XCTAssertTrue(bodyString.contains("Boundary-\(uuid)"))
+        XCTAssertTrue(bodyString.contains("Content-Disposition: form-data; name=\"\(request.files[0].key)\"; filename=\"\(request.files[0].fileName)\""))
+        XCTAssertTrue(bodyString.contains("Content-Type: \(request.files[0].mimeType.rawValue)"))
+        XCTAssertTrue(bodyString.contains("Content-Disposition: form-data; name=\"\(request.files[1].key)\"; filename=\"\(request.files[1].fileName)\""))
+        XCTAssertTrue(bodyString.contains("Content-Type: \(request.files[1].mimeType.rawValue)"))
+    }
+    
     // MARK: - Mock URLSession
 
     private struct URLSessionMock: URLSessionProtocol {
@@ -168,3 +208,4 @@ final class DefaultNetworkDispatcherTests: XCTestCase {
     }
 }
 // swiftlint:enable force_unwrapping
+

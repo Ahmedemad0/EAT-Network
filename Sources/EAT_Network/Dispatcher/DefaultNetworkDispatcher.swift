@@ -17,21 +17,30 @@ public final class DefaultNetworkDispatcher: NetworkDispatcher {
         return try request.responseDecoder(data)
     }
     
-    public func upload<Request: FileRequestType>(_ request: Request) async throws -> Request.ResponseType  {
+    public func upload<Request: FilesRequestType>(_ request: Request) async throws -> Request.ResponseType  {
         
         var urlRequest = try request.asURLRequest()
-        let requestData = request.data
 
-        let filename = "name_\(Date().toString()).\(request.mimeType.rawValue)"
         let boundary = "Boundary-\(UUID().uuidString)"
 
-        urlRequest.httpMethod = "POST"
+        urlRequest.httpMethod = request.method.rawValue
         urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        let files = request.files.map { file in
+            let fileData = file.data
+            let filename = "\(file.fileName)_\(Date().toString()).\(file.mimeType.fileExtension)"
+            
+            return DefaultFile(
+                key: file.key,
+                fileName: filename,
+                mimeType: file.mimeType,
+                data: fileData
+            )
+        }
+        
         urlRequest.httpBody = createBody(
             boundary: boundary,
-            data: requestData,
-            mimeType: request.mimeType.rawValue,
-            filename: filename
+            files: files
         )
 
         let (data, _) = try await session.data(for: urlRequest)

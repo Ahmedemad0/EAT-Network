@@ -19,9 +19,9 @@ public protocol NetworkDispatcher {
 
      - Note: This function is asynchronous and should be called using the `await` keyword.
 
-     - Requires: The `Request` type must conform to the `FileRequestType` protocol.
+     - Requires: The `Request` type must conform to the `FilesRequestType` protocol.
      */
-    func upload<Request: FileRequestType>(_ request: Request) async throws -> Request.ResponseType
+    func upload<Request: FilesRequestType>(_ request: Request) async throws -> Request.ResponseType
 }
 
 extension NetworkDispatcher {
@@ -36,17 +36,23 @@ extension NetworkDispatcher {
      
      - Returns: The request body as `Data`.
      */
-    func createBody(boundary: String, data: Data, mimeType: String, filename: String) -> Data {
+    func createBody(
+        boundary: String,
+        files: [FileType]
+    ) -> Data {
         let body = NSMutableData()
         let boundaryPrefix = "--\(boundary)\r\n"
 
-        body.append(boundaryPrefix)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
-        body.append("Content-Type: \(mimeType)\r\n\r\n")
-        body.append(data)
-        body.append("\r\n")
-        body.append("--".appending(boundary.appending("--")))
-
+        for file in files {
+            body.append(boundaryPrefix)
+            body.append("Content-Disposition: form-data; name=\"\(file.key)\"; filename=\"\(file.fileName)\"\r\n")
+            body.append("Content-Type: \(file.mimeType.rawValue)\r\n\r\n")
+            body.append(file.data)
+            body.append("\r\n")
+        }
+        
+        body.append("--\(boundary)--\r\n")
         return body as Data
     }
+
 }
