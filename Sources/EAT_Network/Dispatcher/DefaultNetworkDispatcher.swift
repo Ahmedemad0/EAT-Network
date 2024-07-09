@@ -54,9 +54,13 @@ public final class DefaultNetworkDispatcher: NetworkDispatcher {
             throw NetworkError.invalidResponse
         }
 
+        try handleResponseStatusCode(httpResponse)
+    }
+    
+    private func handleResponseStatusCode(_ httpResponse: HTTPURLResponse) throws {
         switch httpResponse.statusCode {
         case 200...299:
-           break
+            break
         case 400:
             throw NetworkError.badRequest
         case 401:
