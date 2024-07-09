@@ -12,9 +12,15 @@ extension ResponseDecoder {
     /// Default implementation of responseDecoder that uses JSONDecoder to decode the response data.
     public var responseDecoder: (Data) throws -> ResponseType {
         { data in
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            return try decoder.decode(ResponseType.self, from: data)
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                return try decoder.decode(ResponseType.self, from: data)
+            } catch {
+                // TODO: needed to Implement logger
+                debugPrint(NetworkError.invalidDecoding.localizedDescription)
+                throw NetworkError.invalidDecoding
+            }
         }
     }
 }
