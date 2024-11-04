@@ -25,24 +25,31 @@ public protocol NetworkDispatcher {
 }
 
 extension NetworkDispatcher {
-    /**
-     Creates the body of a multipart form-data request.
-     
-     - Parameters:
-        - boundary: The boundary string used to separate different parts of the request body.
-        - data: The data to be included in the request body.
-        - mimeType: The MIME type of the data.
-        - filename: The name of the file being uploaded.
-     
-     - Returns: The request body as `Data`.
-     */
+    
+    /// Creates a multipart form-data body for an HTTP request with specified boundary, files, and parameters.
+    ///
+    /// - Parameters:
+    ///   - boundary: A unique boundary string used to separate parts of the form-data body.
+    ///   - files: An array of `FileType` instances representing files to be included in the form-data body.
+    ///   - parameters: A dictionary of key-value pairs (`[String: Any]`) representing additional parameters to be included in the form-data body.
+    ///
+    /// - Returns: A `Data` object representing the multipart form-data body with both files and parameters included.
     func createBody(
         boundary: String,
-        files: [FileType]
+        files: [FileType],
+        parameters: [String: Any]
     ) -> Data {
         let body = NSMutableData()
         let boundaryPrefix = "--\(boundary)\r\n"
-
+    
+        // Append parameters to the body
+        for (key, value) in parameters {
+            body.append(boundaryPrefix)
+            body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n")
+            body.append("\(value)\r\n")
+        }
+    
+        // Append files to the body
         for file in files {
             body.append(boundaryPrefix)
             body.append("Content-Disposition: form-data; name=\"\(file.key)\"; filename=\"\(file.fileName)\"\r\n")
@@ -51,8 +58,9 @@ extension NetworkDispatcher {
             body.append("\r\n")
         }
         
+        // Final boundary to indicate the end of the form-data body
         body.append("--\(boundary)--\r\n")
+        
         return body as Data
     }
-
 }
