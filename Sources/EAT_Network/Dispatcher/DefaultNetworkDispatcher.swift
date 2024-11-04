@@ -41,7 +41,8 @@ public final class DefaultNetworkDispatcher: NetworkDispatcher {
         
         urlRequest.httpBody = createBody(
             boundary: boundary,
-            files: files
+            files: files,
+            parameters: request.bodyParameters
         )
 
         let (data, response) = try await session.data(for: urlRequest)
