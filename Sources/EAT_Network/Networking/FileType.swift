@@ -28,6 +28,13 @@ public protocol FilesType {
 
 /// A struct representing a default file.
 public struct DefaultFile: FileType {
+
+    public init(key: String, fileName: String, mimeType: MimeType, data: Data) {
+        self.key = key
+        self.fileName = fileName
+        self.mimeType = mimeType
+        self.data = data
+    }
     /// The key associated with the file.
     public var key: String
     /// The name of the file.
